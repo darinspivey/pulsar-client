@@ -18,6 +18,14 @@ struct Args {
     /// Size of each message in kilobytes
     #[arg(short, long, default_value_t = 1)]
     size: usize,
+
+    /// Topic to publish messages to
+    #[arg(
+        short,
+        long,
+        default_value = "persistent://your_tenant/your_namespace/your_topic"
+    )]
+    topic: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -51,7 +59,7 @@ async fn main() -> Result<(), pulsar::Error> {
     let pulsar: Pulsar<_> = Pulsar::builder(addr, TokioExecutor).build().await?;
     let mut producer = pulsar
         .producer()
-        .with_topic("your_tenant/your_namespace/your_topic")
+        .with_topic(&args.topic) // Use the topic from command-line arguments
         .with_name("my producer")
         .with_options(producer::ProducerOptions {
             schema: Some(proto::Schema {
